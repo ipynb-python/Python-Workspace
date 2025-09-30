@@ -1,0 +1,32 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/miniconda",
+  "hostRequirements": {
+    "cpus": 1
+  },
+  "waitFor": "onCreateCommand",
+  "updateContentCommand": "" ,
+  "postCreateCommand": "mv ~/.bashrc ~/.bashrc.bk ;  ln -s /workspaces/$RepositoryName/.profile/bashrc ~/.bashrc ; echo setup bashrc; ln -s /workspaces/$RepositoryName/.profile/bash_history ~/.bash_history ; echo setup bash_history; bash /workspaces/$RepositoryName/.profile/setup.sh",
+  "customizations": {
+    "codespaces": {
+      "openFiles": [],
+      "remote.autoForwardPorts": false
+    },
+    "vscode": {
+      "extensions": [        
+        "ms-python.python",
+      ],
+      "settings": {
+        "chat.disableAIFeatures": true,
+        "editor.tabSize": 4,
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "bash",
+            "icon": "terminal-bash"
+          }
+        }
+      }
+    }
+  }
+}
+        
