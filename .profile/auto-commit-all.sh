@@ -36,7 +36,7 @@ if [ $# -eq 0 ]; then
         # Launch the watcher in the background
         # It calls THIS SCRIPT again, but with $REPO_DIR as an argument
         # The 'flock' in the watcher will prevent duplicates
-        nohup "$SCRIPT_PATH" "$REPO_DIR" > "$LOG_FILE" 2>&1 &
+        nohup bash "$SCRIPT_PATH" "$REPO_DIR" > "$LOG_FILE" 2>&1 &
         
     done
     
