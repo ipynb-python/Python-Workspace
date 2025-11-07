@@ -7,3 +7,4 @@ bash .profile/auto-commit-all.sh
 cat /tmp/auto-commit-.log
 cat /tmp/auto-commit-*.log
 git stash
+git pull
