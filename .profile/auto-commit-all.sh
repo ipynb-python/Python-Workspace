@@ -33,14 +33,10 @@ if [ $# -eq 0 ]; then
         
         echo "   -> Attempting to start watcher. Log file: $LOG_FILE"
         
-<<<<<<< HEAD
-        # Call bash to run the script, no executable permission needed
-=======
         # Launch the watcher in the background
         # It calls THIS SCRIPT again, but with $REPO_DIR as an argument
         # The 'flock' in the watcher will prevent duplicates
->>>>>>> 5fbddbc (auto-commit: 2025-11-07 07:03:48)
-        nohup bash "$SCRIPT_PATH" "$REPO_DIR" > "$LOG_FILE" 2>&1 &
+        nohup "$SCRIPT_PATH" "$REPO_DIR" > "$LOG_FILE" 2>&1 &
         
     done
     
