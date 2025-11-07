@@ -1,0 +1,4 @@
+ls /tmp
+cat auto-commit-workspaces_Python-Workspace.log
+cat /tmp/auto-commit-workspaces_Python-Workspace.lo
+cat /tmp/auto-commit-workspaces_Python-Workspace.log 
