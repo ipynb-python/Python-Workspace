@@ -9,3 +9,4 @@ cd autosave-shadows/
 cd _workspaces_Python_Workspace_/
 git push origin "$AUTOSAVE_BRANCH_NAME" 
 git push origin
+git push origin autosave
