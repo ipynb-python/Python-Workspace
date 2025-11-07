@@ -6,44 +6,35 @@ BASE_DIR="/workspaces"
 
 # The check interval (in seconds)
 SLEEP_INTERVAL=10
+
+# The name of the primary branch to sync
+MAIN_BRANCH="main"
 # ---------------------
 
 # --- Script Logic ---
 
-# Check if an argument (a target directory) was provided
 if [ $# -eq 0 ]; then
     ### LAUNCHER MODE ###
-    # No arguments given: Find all repos and launch watchers.
-    
     echo "Launcher Mode: Finding all git repos under $BASE_DIR..."
     
-    # Get the full, absolute path to this script
-    # This is crucial for nohup to find it
     SCRIPT_PATH=$(realpath "$0")
     
-    # Check if realpath is installed (common, but good to check)
     if [ ! -f "$SCRIPT_PATH" ]; then
         echo "Error: Could not determine script's full path. Is 'realpath' installed?"
         exit 1
     fi
     
-    # Find every directory named ".git"
-    # Then get its parent directory (the repo root)
     find "$BASE_DIR" -type d -name ".git" | while read GIT_DIR; do
         REPO_DIR=$(dirname "$GIT_DIR")
         echo " - Found repo: $REPO_DIR"
         
-        # Sanitize the repo path to create a unique log file name
-        # Replaces '/' with '_' and removes leading '_'
         LOG_NAME=$(echo "$REPO_DIR" | tr '/' '_' | sed 's/^_//')
         LOG_FILE="/tmp/auto-commit-$LOG_NAME.log"
         
         echo "   -> Attempting to start watcher. Log file: $LOG_FILE"
         
-        # Launch the watcher in the background
-        # It calls THIS SCRIPT again, but with $REPO_DIR as an argument
-        # The 'flock' in the watcher will prevent duplicates
-        nohup "$SCRIPT_PATH" "$REPO_DIR" > "$LOG_FILE" 2>&1 &
+        # Call bash to run the script, no executable permission needed
+        nohup bash "$SCRIPT_PATH" "$REPO_DIR" > "$LOG_FILE" 2>&1 &
         
     done
     
@@ -52,12 +43,8 @@ if [ $# -eq 0 ]; then
     
 else
     ### WATCHER MODE ###
-    # Argument provided: This is the watcher for a single repo.
-    
     TARGET_DIR="$1"
     
-    # --- Unique Lock File ---
-    # Create a unique lock file name based on the repo path
     LOCK_NAME=$(echo "$TARGET_DIR" | tr -c 'a-zA-Z0-9' '_')
     LOCKFILE="/tmp/auto-commit-lock-$LOCK_NAME.lock"
 
@@ -67,26 +54,53 @@ else
     # Try to acquire a non-blocking lock. If it fails, exit.
     flock -n 200 || {
         echo "[$TARGET_DIR] Error: Watcher is already running. Exiting."
-        exec 200>&- # Close FD
+        exec 200>&- 
         exit 1
     }
     
-    # --- Main Watcher Loop ---
-    echo "[$TARGET_DIR] Watcher started (PID: $$). Lock acquired."
+    # Set trap for graceful exit *after* lock is acquired
+    trap 'echo "[$TARGET_DIR] Exiting and releasing lock."; exec 200>&-; exit 0' SIGINT SIGTERM
     
-    # Go to the target directory
+    echo "[$TARGET_DIR] Watcher starting (PID: $$). Lock acquired."
+    
     cd "$TARGET_DIR" || { 
         echo "[$TARGET_DIR] Error: Could not navigate to $TARGET_DIR. Exiting."
-        exec 200>&- # Release lock
+        exec 200>&- 
         exit 1 
     }
-    
-    # Graceful exit on Ctrl+C or kill
-    trap 'echo "[$TARGET_DIR] Exiting and releasing lock."; exec 200>&-; exit 0' SIGINT SIGTERM
 
+    # --- NEW: Save local changes and sync with origin ---
+    echo "[$TARGET_DIR] Checking for local changes before sync..."
+    
+    # 1. Save any uncommitted changes to a new branch
+    if [ -n "$(git status --porcelain)" ]; then
+        BRANCH_NAME="codespace-backup-$(date +'%Y%m%d-%H%M%S')"
+        echo "[$TARGET_DIR]   -> Uncommitted changes found. Saving to new branch: $BRANCH_NAME"
+        
+        git checkout -b "$BRANCH_NAME" || { echo "[$TARGET_DIR] Error: Failed to create backup branch. Exiting."; exec 200>&-; exit 1; }
+        git add .
+        git commit -m "Auto-backup of local changes" || { echo "[$TARGET_DIR] Error: Failed to commit to backup branch. Exiting."; exec 200>&-; exit 1; }
+        
+        echo "[$TARGET_DIR]   -> Backup complete."
+    else
+        echo "[$TARGET_DIR]   -> No uncommitted changes found. Skipping backup."
+    fi
+    
+    # 2. Fetch origin and force-reset the main branch
+    echo "[$TARGET_DIR] Fetching latest changes from origin..."
+    git fetch origin || { echo "[$TARGET_DIR] Error: 'git fetch origin' failed. Check network/remote. Exiting."; exec 200>&-; exit 1; }
+    
+    echo "[$TARGET_DIR] Switching to $MAIN_BRANCH and resetting to origin/$MAIN_BRANCH..."
+    git checkout "$MAIN_BRANCH" || { echo "[$TARGET_DIR] Error: Could not check out $MAIN_BRANCH. Exiting."; exec 200>&-; exit 1; }
+    
+    git reset --hard "origin/$MAIN_BRANCH" || { echo "[$TARGET_DIR] Error: Could not reset to origin/$MAIN_BRANCH. Exiting."; exec 200>&-; exit 1; }
+    
+    echo "[$TARGET_DIR] Sync complete. Now watching $MAIN_BRANCH for changes."
+    # --- End of new logic ---
+
+    # Start the main watcher loop
     while true
     do
-        # Check for changes
         if [ -n "$(git status --porcelain)" ]; then
             echo "[$TARGET_DIR] Changes detected at $(date +'%Y-%m-%d %H:%M:%S'). Committing..."
             
