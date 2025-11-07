@@ -70,3 +70,4 @@ bash .profile/auto-commit-all.sh -h
 bash .profile/auto-commit-all.sh 
 cd /tmp/autosave-shadows/_workspaces_Python_Workspace_/
 ls
+cat WARNING>txt
