@@ -1,1 +1,6 @@
 
+top
+cat /tmp/auto-commit-*.log
+ls /tmp
+vi .profile/auto-commit-all.sh 
+bash .profile/auto-commit-all.sh 
