@@ -1,0 +1,3 @@
+cd /workspaces/Python-Workspace/
+git pull
+git config pull.rebase true
