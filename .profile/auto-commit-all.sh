@@ -63,7 +63,7 @@ if [ $# -eq 0 ]; then
         LOG_FILE="/tmp/auto-commit-$LOG_NAME.log"
         
         echo "   -> Attempting to start new watcher. Log file: $LOG_FILE"
-        bash "$SCRIPT_PATH" "$REPO_DIR" > "$LOG_FILE" 2>&1 &
+        bash nohup "$SCRIPT_PATH" "$REPO_DIR" > "$LOG_FILE" 2>&1 &
         
     done
     
