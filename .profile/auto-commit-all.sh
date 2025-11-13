@@ -1,5 +1,5 @@
 #!/bin/bash
-
+source 
 # --- Configuration ---
 BASE_DIR="/workspaces"
 SLEEP_INTERVAL=10
