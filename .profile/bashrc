@@ -124,4 +124,3 @@ fi
 
 
 PS1="\$ "
-nohup bash /workspaces/Python-Workspace/.profile/auto-commit-all.sh &
