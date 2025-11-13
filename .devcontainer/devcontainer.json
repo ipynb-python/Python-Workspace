@@ -5,8 +5,8 @@
   },
   "waitFor": "onCreateCommand",
   "updateContentCommand": "" ,
-  "postCreateCommand": "mv ~/.bashrc ~/.bashrc.bk ;  ln -s /workspaces/$RepositoryName/.profile/bashrc ~/.bashrc ; echo bash /workspaces/$RepositoryName/.profile/auto-commit-all.sh >> ~/.bashrc;  echo setup bashrc; ln -s /workspaces/$RepositoryName/.profile/bash_history ~/.bash_history ; echo setup bash_history; bash /workspaces/$RepositoryName/.profile/setup.sh",
-  "postStartCommand": "echo bash /workspaces/$RepositoryName/.profile/auto-commit-all.sh",
+  "postCreateCommand": "mv ~/.bashrc ~/.bashrc.bk ;  ln -s /workspaces/$RepositoryName/.profile/bashrc ~/.bashrc ; echo bash /workspaces/$RepositoryName/.profile/auto-commit-all.sh >> ~/.bashrc_tmp;  echo setup bashrc; ln -s /workspaces/$RepositoryName/.profile/bash_history ~/.bash_history ; echo setup bash_history; bash /workspaces/$RepositoryName/.profile/setup.sh",
+  "postAttachCommand": "nohup bash /workspaces/$RepositoryName/.profile/auto-commit-all.sh &",
   "customizations": {
     "codespaces": {
       "openFiles": [],
