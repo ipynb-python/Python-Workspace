@@ -8,3 +8,5 @@ nohup bash /workspaces/$RepositoryName/.profile/auto-commit-all.sh 2>&1 &
 cat nohup.out 
 cat /tmp/auto-commit-workspaces_Python-Workspace.log
 cat /tmp/nohup.out 
+ls -l /workspaces/Python-Workspace/.profile/auto-commit-all.sh
+chmod a+x /workspaces/Python-Workspace/.profile/auto-commit-all.sh
